@@ -9,6 +9,6 @@ The code to create your own training dataset can be found [*here*](https://githu
 * [vgg16](https://pan.baidu.com/s/1vK3l8rzgAkxcKpLvnFAwXA) (put it in 'VGGnet/')<br>
 
 #### For testing:<br>
-* [Trained model](https://pan.baidu.com/s/1zH6DC0N78Mw2jvPRB2I6HA)<br>
+* [Trained model](https://pan.baidu.com/s/1xQUrIKWPJIEBhNnr4cgDsw) (password: U2Fu)<br>
 
 If you have any question, please email to me (xu_han@whu.edu.cn).
