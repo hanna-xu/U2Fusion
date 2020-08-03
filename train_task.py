@@ -38,15 +38,6 @@ def train_task(model, sess, trainset, save_path=None, validset=[], lam = 0, task
 		with tf.control_dependencies(update_ops):
 			model.solver = tf.train.RMSPropOptimizer(learning_rate = LEARNING_RATE, decay = 0.6,
 			                                           momentum = 0.15).minimize(model.content_loss, var_list = model.var_list)
-		# model.G_solver1 = tf.train.RMSPropOptimizer(learning_rate = LEARNING_RATE*2, decay = 0.6,
-		#                                            momentum = 0.15).minimize(model.ssim_loss,
-		#                                                                      var_list = model.theta_G)
-		# model.G_solver2 = tf.train.RMSPropOptimizer(learning_rate = LEARNING_RATE, decay = 0.6,
-		#                                            momentum = 0.15).minimize(model.self_loss,
-		#                                                                      var_list = model.theta_G)
-		# model.W_solver = tf.train.RMSPropOptimizer(learning_rate = LEARNING_RATE*2, decay = 0.6,
-		#                                            momentum = 0.15).minimize(model.ssim_loss,
-		#                                                                      var_list = model.theta_W)
 
 	else:
 		model.update_ewc_loss(lam = lam)
@@ -58,7 +49,6 @@ def train_task(model, sess, trainset, save_path=None, validset=[], lam = 0, task
 
 
 	model.clip = [p.assign(tf.clip_by_value(p, -50, 50)) for p in model.var_list]
-	# model.clipW = [p.assign(tf.clip_by_value(p, -30, 30)) for p in model.theta_W]
 
 	initialize_uninitialized(sess)
 
@@ -80,37 +70,6 @@ def train_task(model, sess, trainset, save_path=None, validset=[], lam = 0, task
 			FEED_DICT= {model.SOURCE1: source1_batch, model.SOURCE2: source2_batch, model.c: c[task_ind-1]}
 
 			sess.run([model.solver, model.clip], feed_dict = FEED_DICT)
-			# closs, add_loss = sess.run([model.content_loss, model.Add_loss], feed_dict = FEED_DICT)
-			#print("Content loss:%s, Add_loss:%s\n" % (closs, add_loss*lam/2))
-
-			# ms, ws1, ws2 = sess.run([model.s, model.ws1, model.ws2], feed_dict = FEED_DICT)
-			# print("s1-s2:", ws1[0]-ws2[0])
-			# print("s1-s2:", ws1[1] - ws2[1])
-			# print("s1-s2:", ws1[2] - ws2[2])
-			# print("w1: %s, w2: %s" % (ms[0, 0], ms[0, 1]))
-			# print("w1: %s, w2: %s" % (ms[1, 0], ms[1, 1]))
-			# print("w1: %s, w2: %s\n" % (ms[2, 0], ms[2, 1]))
-			# fig = plt.figure()
-			# f1 = fig.add_subplot(321)
-			# f2 = fig.add_subplot(322)
-			# f3 = fig.add_subplot(323)
-			# f4 = fig.add_subplot(324)
-			# f5 = fig.add_subplot(325)
-			# f6 = fig.add_subplot(326)
-			# f1.imshow(source1_batch[0, :, :, 0], cmap='gray')
-			# f2.imshow(source2_batch[0, :, :, 0], cmap='gray')
-			# f3.imshow(source1_batch[1, :, :, 0], cmap='gray')
-			# f4.imshow(source2_batch[1, :, :, 0], cmap='gray')
-			# f5.imshow(source1_batch[2, :, :, 0], cmap='gray')
-			# f6.imshow(source2_batch[2, :, :, 0], cmap='gray')
-			# plt.show()
-
-
-			# generated_img = sess.run(model.generated_img, feed_dict=FEED_DICT)
-			# with tf.device('/gpu:1'):
-			# 	iqa_f=IQA(inputs = generated_img, trained_model_path = IQA_model)
-			# 	en_f=EN(generated_img)
-			# 	score_f=np.mean(iqa_f + w_en * en_f)
 
 			result = sess.run(merged, feed_dict = FEED_DICT)
 			writer[task_ind - 1].add_summary(result, model.step)
@@ -127,17 +86,9 @@ def train_task(model, sess, trainset, save_path=None, validset=[], lam = 0, task
 					valid_source2_batch = sub_validset[batch_ind * model.batchsize:(batch_ind * model.batchsize + model.batchsize), :, :, 1 - s_index[0]]
 					valid_source1_batch = np.expand_dims(valid_source1_batch, -1)
 					valid_source2_batch = np.expand_dims(valid_source2_batch, -1)
-					# valid_w1, valid_w2 = W(inputs1 = valid_source1_batch, inputs2 = valid_source2_batch, trained_model_path = IQA_model,w_en=w_en,c=c)
+
 
 					valid_FEED_DICT = {model.SOURCE1: valid_source1_batch, model.SOURCE2: valid_source2_batch, model.c:c[i]}
-					# print("c", sess.run(model.c, feed_dict = valid_FEED_DICT))
-					# valid_generated_img = sess.run(model.generated_img, feed_dict = valid_FEED_DICT)
-
-					# with tf.device('/gpu:1'):
-					# 	valid_iqa_f = IQA(inputs = valid_generated_img, trained_model_path = IQA_model)
-					# 	valid_en_f = EN(valid_generated_img)
-					# 	valid_score_f = np.mean(valid_iqa_f + w_en * valid_en_f)
-
 					valid_result = sess.run(merged, feed_dict = valid_FEED_DICT)
 					writer[i].add_summary(valid_result, model.step)
 					writer[i].flush()
@@ -176,60 +127,26 @@ def initialize_uninitialized(sess):
 		sess.run(tf.variables_initializer(not_initialized_vars))
 
 
-# def W(inputs1,inputs2, trained_model_path, w_en, c):
-# 	# with tf.device('/gpu:1'):
-# 	iqa1 = IQA(inputs = inputs1, trained_model_path = trained_model_path)
-# 	iqa2 = IQA(inputs = inputs2, trained_model_path = trained_model_path)
+
+# def EN(inputs):
+# 	len = inputs.shape[0]
+# 	entropies = np.zeros(shape = (len, 1))
+# 	grey_level = 256
+# 	counter = np.zeros(shape = (grey_level, 1))
 #
-# 	with tf.device('/cpu:0'):
-# 		en1 = EN(inputs1)
-# 		en2 = EN(inputs2)
-# 		score1 = iqa1 + w_en * en1
-# 		score2 = iqa2 + w_en * en2
-# 		w1 = np.exp(score1 / c) / (np.exp(score1 / c) + np.exp(score2 / c))
-# 		w2 = np.exp(score2 / c) / (np.exp(score1 / c) + np.exp(score2 / c))
-
-	# print('IQA:   1: %f, 2: %f' % (iqa1[0], iqa2[0]))
-	# print('EN:    1: %f, 2: %f' % (en1[0], en2[0]))
-	# print('total: 1: %f, 2: %f' % (score1[0], score2[0]))
-	# print('w1: %s, w2: %s\n' % (w1[0], w2[0]))
-	# print('IQA:   1: %f, 2: %f' % (iqa1[1], iqa2[1]))
-	# print('EN:    1: %f, 2: %f' % (en1[1], en2[1]))
-	# print('total: 1: %f, 2: %f' % (score1[1], score2[1]))
-	# print('w1: %s, w2: %s\n' % (w1[1], w2[1]))
-	# fig = plt.figure()
-	# fig1 = fig.add_subplot(221)
-	# fig2 = fig.add_subplot(222)
-	# fig3 = fig.add_subplot(223)
-	# fig4 = fig.add_subplot(224)
-	# fig1.imshow(inputs1[0, :, :, 0], cmap = 'gray')
-	# fig2.imshow(inputs2[0, :, :, 0], cmap = 'gray')
-	# fig3.imshow(inputs1[1,:,:,0],cmap='gray')
-	# fig4.imshow(inputs2[1,:,:,0],cmap='gray')
-	# plt.show()
-	# return (w1,w2)
-
-
-
-def EN(inputs):
-	len = inputs.shape[0]
-	entropies = np.zeros(shape = (len, 1))
-	grey_level = 256
-	counter = np.zeros(shape = (grey_level, 1))
-
-	for i in range(len):
-		input_uint8 = (inputs[i, :, :, 0] * 255).astype(np.uint8)
-		input_uint8 = input_uint8 + 1
-		for m in range(patch_size):
-			for n in range(patch_size):
-				indexx = input_uint8[m, n]
-				counter[indexx] = counter[indexx] + 1
-		total = np.sum(counter)
-		p = counter / total
-		for k in range(grey_level):
-			if p[k] != 0:
-				entropies[i] = entropies[i] - p[k] * np.log2(p[k])
-	return entropies
+# 	for i in range(len):
+# 		input_uint8 = (inputs[i, :, :, 0] * 255).astype(np.uint8)
+# 		input_uint8 = input_uint8 + 1
+# 		for m in range(patch_size):
+# 			for n in range(patch_size):
+# 				indexx = input_uint8[m, n]
+# 				counter[indexx] = counter[indexx] + 1
+# 		total = np.sum(counter)
+# 		p = counter / total
+# 		for k in range(grey_level):
+# 			if p[k] != 0:
+# 				entropies[i] = entropies[i] - p[k] * np.log2(p[k])
+# 	return entropies
 
 
 def grad(img):

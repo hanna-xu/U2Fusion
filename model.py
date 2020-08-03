@@ -16,8 +16,6 @@ from Net import Generator
 from LOSS import SSIM_LOSS, Fro_LOSS #, L1_LOSS, Fro_LOSS
 from collections import Iterable
 
-
-# from deepIQA_evaluate import IQA
 from VGGnet.vgg16 import Vgg16
 WEIGHT_INIT_STDDEV = 0.05
 
@@ -41,7 +39,6 @@ class Model(object):
 		print('source shape:', self.SOURCE1.shape)
 
 		self.generated_img = self.G.transform(I1 = self.SOURCE1, I2 = self.SOURCE2, is_training = is_training, reuse=False)
-		# self.weights = self.W.transform(I1 = self.SOURCE1, I2 = self.SOURCE2, is_training = is_training)
 		self.var_list.extend(tf.trainable_variables())
 
 		# for i in self.var_list:
@@ -88,25 +85,6 @@ class Model(object):
 			self.content_loss = self.ssim_loss + 20 * self.mse_loss
 
 
-		# if hasattr(self, "ewc_loss"):
-		# 	self.Add_loss = self.ewc_loss - self.content_loss
-
-		# self.theta_G = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope = 'Generator')
-		# self.clip_G = [p.assign(tf.clip_by_value(p, -30, 30)) for p in self.theta_G]
-		# #
-		# self.theta_W = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope = 'WeightNet')
-		# self.clip_W = [p.assign(tf.clip_by_value(p, -30, 30)) for p in self.theta_W]
-
-		# print("thetaG:")
-		# for i in self.theta_G:
-		# 	print(i)
-		# print("thetaW:")
-		# for i in self.theta_W:
-		# 	print(i)
-
-	# self.var_change=[]
-	# for v in range(len(self.var_list)):
-	# 	self.var_change.append(np.zeros(self.var_list[v].get_shape().as_list()))
 
 	def compute_fisher(self, imgset, c, sess, num_samples = 200):
 		# computer Fisher information for each parameter
@@ -179,65 +157,61 @@ class Model(object):
 			self.ewc_loss = self.content_loss
 
 		for v in range(len(self.var_list)):
-			# self.ewc_loss += (lam / 2) * tf.reduce_sum(
-			# 	tf.multiply(self.F_accum[v].astype(np.float32), tf.square(self.var_list[v] - self.star_vars[v])))
 			self.Add_loss += tf.reduce_sum(
 				tf.multiply(self.F_accum[v].astype(np.float32), tf.square(self.var_list[v] - self.star_vars[v])))
 			self.ewc_loss += (lam / 2) * self.Add_loss
-			# self.ewc_loss = (lam / 2) * self.Add_loss
-		# print("update ewc loss")
 
 
 
-def EN(inputs):
-	len = inputs.shape[0]
-	entropies = []  # tf.Variable(tf.zeros(shape = (len, 1)))
-	grey_level = 256
-	counter = tf.Variable(tf.zeros(shape = (grey_level, 1), dtype = tf.int32))
-	one = tf.constant(1)
-
-	for i in range(len):
-		input_uint8 = tf.cast(inputs[i, :, :, 0] * 255, dtype = tf.int32)
-		input_uint8 = input_uint8 + 1
-		W = inputs.shape[1]
-		H = inputs.shape[2]
-		for m in range(int(W)):
-			for n in range(int(H)):
-				indexx = input_uint8[m, n]
-				# print("counter[indexx]", counter[indexx])
-				counter[indexx] = tf.add(counter[indexx], one)
-		counter = tf.cast(counter, tf.float32)
-		total = tf.reduce_sum(counter)
-		p = counter / total
-		for k in range(grey_level):
-			entropies.append(- p[k] * (tf.log(p[k] + eps) / tf.log(2.0)))
-	return entropies
-
-
-def tf_EN(inputs):
-	len = inputs.shape[0]
-	W = int(inputs.shape[1])
-	H = int(inputs.shape[2])
-	total = W * H * 1.0
-	grey_level = 256
-
-	for i in range(len):
-		input0 = tf.cast(inputs[i, :, :, 0] * 255, dtype = tf.int32)
-		input1 = tf.cast(input0, dtype = tf.float32)
-		input2 = input1 + 1
-
-		for k in range(grey_level):
-			if k == 0:
-				p = tf.expand_dims(num(input2, k) / total, axis = 0)
-			else:
-				p = tf.concat([p, tf.expand_dims(num(input2, k) / total, axis = 0)], axis = 0)
-		ep = - tf.multiply(p, tf.log(p + eps * eps) / tf.Variable(tf.log(2.0)))
-
-		if i == 0:
-			entropies = tf.expand_dims(tf.reduce_sum(ep), axis = 0)
-		else:
-			entropies = tf.concat([entropies, tf.expand_dims(tf.reduce_sum(ep), axis = 0)], axis = 0)
-	return entropies
+# def EN(inputs):
+# 	len = inputs.shape[0]
+# 	entropies = []  # tf.Variable(tf.zeros(shape = (len, 1)))
+# 	grey_level = 256
+# 	counter = tf.Variable(tf.zeros(shape = (grey_level, 1), dtype = tf.int32))
+# 	one = tf.constant(1)
+#
+# 	for i in range(len):
+# 		input_uint8 = tf.cast(inputs[i, :, :, 0] * 255, dtype = tf.int32)
+# 		input_uint8 = input_uint8 + 1
+# 		W = inputs.shape[1]
+# 		H = inputs.shape[2]
+# 		for m in range(int(W)):
+# 			for n in range(int(H)):
+# 				indexx = input_uint8[m, n]
+# 				# print("counter[indexx]", counter[indexx])
+# 				counter[indexx] = tf.add(counter[indexx], one)
+# 		counter = tf.cast(counter, tf.float32)
+# 		total = tf.reduce_sum(counter)
+# 		p = counter / total
+# 		for k in range(grey_level):
+# 			entropies.append(- p[k] * (tf.log(p[k] + eps) / tf.log(2.0)))
+# 	return entropies
+#
+#
+# def tf_EN(inputs):
+# 	len = inputs.shape[0]
+# 	W = int(inputs.shape[1])
+# 	H = int(inputs.shape[2])
+# 	total = W * H * 1.0
+# 	grey_level = 256
+#
+# 	for i in range(len):
+# 		input0 = tf.cast(inputs[i, :, :, 0] * 255, dtype = tf.int32)
+# 		input1 = tf.cast(input0, dtype = tf.float32)
+# 		input2 = input1 + 1
+#
+# 		for k in range(grey_level):
+# 			if k == 0:
+# 				p = tf.expand_dims(num(input2, k) / total, axis = 0)
+# 			else:
+# 				p = tf.concat([p, tf.expand_dims(num(input2, k) / total, axis = 0)], axis = 0)
+# 		ep = - tf.multiply(p, tf.log(p + eps * eps) / tf.Variable(tf.log(2.0)))
+#
+# 		if i == 0:
+# 			entropies = tf.expand_dims(tf.reduce_sum(ep), axis = 0)
+# 		else:
+# 			entropies = tf.concat([entropies, tf.expand_dims(tf.reduce_sum(ep), axis = 0)], axis = 0)
+# 	return entropies
 
 
 def num(input, k):
