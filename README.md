@@ -11,4 +11,14 @@ The code to create your own training dataset can be found [*here*](https://githu
 #### For testing:<br>
 * [Trained model](https://pan.baidu.com/s/1xQUrIKWPJIEBhNnr4cgDsw) (password: U2Fu)<br>
 
+If this work is helpful to you, please cite it as:
+```
+@article{xu2020u2fusion,
+  title={U2Fusion: A Unified Unsupervised Image Fusion Network},
+  author={Xu, Han and Ma, Jiayi and Jiang, Junjun and Guo, Xiaojie and Ling, Haibin},
+  journal={IEEE Transactions on Pattern Analysis and Machine Intelligence},
+  year={2020},
+  publisher={IEEE}
+}
+```
 If you have any question, please email to me (xu_han@whu.edu.cn).
