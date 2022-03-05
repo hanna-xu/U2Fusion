@@ -8,6 +8,9 @@ Large files should be downloaded separately, including the following files: <br>
 The code to create your own training dataset can be found [*here*](https://github.com/hanna-xu/utils).
 * [vgg16](https://pan.baidu.com/s/1vK3l8rzgAkxcKpLvnFAwXA) (put it in 'VGGnet/')<br>
 
+#### Dealing with RGB input:<br>
+Refer to this [code](https://github.com/hanna-xu/utils)<br>
+
 If this work is helpful to you, please cite it as:
 ```
 @article{xu2020u2fusion,
