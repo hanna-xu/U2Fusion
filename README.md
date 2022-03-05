@@ -9,7 +9,7 @@ The code to create your own training dataset can be found [*here*](https://githu
 * [vgg16](https://pan.baidu.com/s/1vK3l8rzgAkxcKpLvnFAwXA) (put it in 'VGGnet/')<br>
 
 #### Dealing with RGB input:<br>
-Refer to this [code](https://github.com/hanna-xu/utils)<br>
+Refer to [this code](https://github.com/hanna-xu/utils/tree/master/fusedY2RGB).<br>
 
 If this work is helpful to you, please cite it as:
 ```
