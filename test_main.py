@@ -133,7 +133,7 @@ def main():
             if len(Shape1)>2:
                 output = ycbcr2rgb(output, img1_cb, img1_cr)
             end = time.time()
-            time_cost[pic_num]=end-start
+            time_cost[pic_num-1]=end-start
             print("Testing [%d] success,Testing time is [%f]\n" % (pic_num, end - start))
             imsave(output_path + name + Format, output)
 
