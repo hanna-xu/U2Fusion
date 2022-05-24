@@ -8,7 +8,7 @@ import tensorflow as tf
 import scipy.ndimage
 # from Net import Generator, WeightNet
 from scipy.misc import imread, imsave
-
+import scipy.io as scio
 from skimage import transform, data
 from glob import glob
 from model import Model
