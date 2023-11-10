@@ -61,6 +61,25 @@ def listdir(path):
 	return list_name
 
 
+def rgb2ycbcr(img):
+	R=img[:,:,0]
+	G=img[:,:,1]
+	B=img[:,:,2]
+	Y = 0.299 * R + 0.587 * G + 0.114 * B
+	Cb = -0.1687 * R - 0.3313 * G + 0.5 * B + 128 / 255.0
+	Cr = 0.5 * R - 0.4187 * G - 0.0813 * B + 128 / 255.0
+	return Y, Cb, Cr
+
+
+def ycbcr2rgb(Y, Cb, Cr):
+	R = Y + 1.402 * (Cr - 128 / 255.0)
+	G = Y - 0.34414 * (Cb - 128 / 255.0) - 0.71414 * (Cr - 128 / 255.0)
+	B = Y + 1.772 * (Cb - 128 / 255.0)
+	R = np.expand_dims(R, axis=-1)
+	G = np.expand_dims(G, axis=-1)
+	B = np.expand_dims(B, axis=-1)
+	return np.concatenate([R, G, B], axis=-1)
+
 def main():
     print('\nBegin to generate pictures ...\n')
     Format = '.png'
@@ -85,9 +104,10 @@ def main():
 
         for file in files:
             pic_num += 1
-            name = file.split('/')[-1]
-            name = name.split('.')[-2]
-            print("\033[0;33;40m[" + str(pic_num) + "/" + str(len(files)) + "]: " + name + ".png" + "\033[0m")
+            names = file.split('/')[-1]
+            name = names.split('.')[-2]
+            Format = names.split('.')[-1]
+            print("\033[0;33;40m[" + str(pic_num) + "/" + str(len(files)) + "]: " + name + "." + Format + "\033[0m")
 
             img1 = imread(path1 + file.split('/')[-1], flatten=False) / 255.0
             img2 = imread(path2 + file.split('/')[-1], flatten=False) / 255.0
@@ -109,10 +129,14 @@ def main():
             start = time.time()
             outputs = sess.run(M.generated_img, feed_dict={M.SOURCE1: img1, M.SOURCE2: img2})
             output = outputs[0, :, :, 0]
+            if len(Shape1) > 2 and len(Shape2) == 2:
+                output = ycbcr2rgb(output, img1_cb, img1_cr)
+            if len(Shape2) > 2 and len(Shape1) == 2:
+                output = ycbcr2rgb(output, img2_cb, img2_cr)
             end = time.time()
             time_cost[pic_num-1]=end-start
             print("Testing [%d] success,Testing time is [%f]\n" % (pic_num, end - start))
-            imsave(output_path + name + Format, output)
+            scipy.misc.toimage(output, cmin=0.0, cmax=np.max(output)).save(output_path + name + '.' + Format)
 
     scio.savemat(output_path + '/time.mat', {'T':time_cost})
 
