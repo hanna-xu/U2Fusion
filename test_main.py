@@ -113,15 +113,16 @@ def main():
             img2 = imread(path2 + file.split('/')[-1], flatten=False) / 255.0
 
             Shape1 = img1.shape
-            print("shape1:", Shape1)
+            Shape2 = img2.shape
+            print("shape1:", Shape1,"shape2:", Shape2)
             if len(Shape1) > 2:
                 img1, img1_cb, img1_cr = rgb2ycbcr(img1)
+            if len(Shape2) > 2:
+                img2, img2_cb, img2_cr = rgb2ycbcr(img2)
             h1 = Shape1[0]
             w1 = Shape1[1]
-            Shape2 = img2.shape
             h2 = Shape2[0]
             w2 = Shape2[1]
-            print("shape2:", Shape2)
             assert (h1 == h2 and w1 == w2), 'Two images must have the same shape!'
             img1 = img1.reshape([1, h1, w1, 1])
             img2 = img2.reshape([1, h1, w1, 1])
