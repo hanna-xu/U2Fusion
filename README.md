@@ -11,13 +11,19 @@ The code to create your own training dataset can be found [*here*](https://githu
 #### Dealing with RGB input:<br>
 * Refer to [this code](https://github.com/hanna-xu/utils/tree/master/fusedY2RGB).<br>
 
+
+#### The PyTorch version of this work is available [here](https://github.com/hanna-xu/U2Fusion-pytorch).<br>
+
 If this work is helpful to you, please cite it as:
 ```
 @article{xu2020u2fusion,
-  title={U2Fusion: A Unified Unsupervised Image Fusion Network},
+  title={U2Fusion: A unified unsupervised image fusion network},
   author={Xu, Han and Ma, Jiayi and Jiang, Junjun and Guo, Xiaojie and Ling, Haibin},
-  journal={IEEE Transactions on Pattern Analysis and Machine Intelligence},
-  year={2020},
+  journal={IEEE transactions on pattern analysis and machine intelligence},
+  volume={44},
+  number={1},
+  pages={502--518},
+  year={2022},
   publisher={IEEE}
 }
 ```
